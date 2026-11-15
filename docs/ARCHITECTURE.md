@@ -38,4 +38,4 @@ article/perspective → `agent_run_id` (provider, model, config version, prompt 
 7. **Manual execution mode** (`TEMPO_MODE=manual`) writes exact prompts to files and reads responses back; recorded as provider `manual`. Used for the first edition because no API key was configured.
 8. **Collection is a soft stage.** A collection failure does not block the edition; later stages use what was gathered and collection retries with backoff.
 9. **Single-owner auth** with HMAC-signed cookie; cron endpoints use a bearer secret. Upgrade path: Auth.js if more users appear.
-10. **UI blocked on approved design.** No invented design; an unstyled preview verifies content.
+10. **UI built from the approved screenshots** with plain CSS tokens; server components read the DB directly, server actions handle owner edits (projects, drafts, approvals, settings).

@@ -24,13 +24,13 @@ export async function seed() {
   }
 
   const integ: { id: string; category: string; env: string[]; detail: string }[] = [
-    { id: "google_calendar", category: "calendar", env: ["GOOGLE_CALENDAR_ICS_URL"], detail: "Private ICS URL (read-only). OAuth sync is on the roadmap." },
-    { id: "github", category: "projects", env: ["GITHUB_TOKEN"], detail: "Repository activity → project snapshots." },
-    { id: "manual_projects", category: "projects", env: [], detail: "Projects entered by hand in TEMPO." },
-    { id: "market_data", category: "finance", env: ["MARKET_DATA_PROVIDER"], detail: "FX/index/commodity observations. Provider not chosen yet." },
-    { id: "telegram", category: "publishing", env: ["TELEGRAM_BOT_TOKEN", "TELEGRAM_CHANNEL_ID"], detail: "Bot API: post to a channel where the bot is admin." },
-    { id: "linkedin", category: "publishing", env: ["LINKEDIN_ACCESS_TOKEN"], detail: "Posting needs an approved LinkedIn app; per-post analytics for personal profiles is not available via API → export/manual entry." },
-    { id: "x", category: "publishing", env: ["X_BEARER_TOKEN"], detail: "Posting requires a paid X API tier with write access." },
+    { id: "google_calendar", category: "calendar", env: ["GOOGLE_CALENDAR_ICS_URL"], detail: "Нужна приватная ссылка ICS (только чтение)." },
+    { id: "github", category: "projects", env: ["GITHUB_TOKEN"], detail: "Активность репозиториев превращается в записи о проектах. Нужен токен GitHub." },
+    { id: "manual_projects", category: "projects", env: [], detail: "Записи о проектах, которые вы вносите вручную." },
+    { id: "market_data", category: "finance", env: ["MARKET_DATA_PROVIDER"], detail: "Курсы, индексы, сырьё. Поставщик данных не выбран." },
+    { id: "telegram", category: "publishing", env: ["TELEGRAM_BOT_TOKEN", "TELEGRAM_CHANNEL_ID"], detail: "Публикация через бота в канал, где он администратор. Нужны токен бота и канал." },
+    { id: "linkedin", category: "publishing", env: ["LINKEDIN_ACCESS_TOKEN"], detail: "Публикация требует одобренного приложения LinkedIn; статистику постов личного профиля API не отдаёт — её вносят вручную." },
+    { id: "x", category: "publishing", env: ["X_BEARER_TOKEN"], detail: "Публикация требует платного тарифа X API с правом записи." },
   ];
   for (const i of integ) {
     const connected = i.env.length > 0 && i.env.every((e) => !!process.env[e]);
