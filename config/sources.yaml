@@ -1,0 +1,56 @@
+# TEMPO source registry.
+# tier: 1 = original / authoritative (labs, institutions, regulators, journals)
+#       2 = reputable newsroom
+#       3 = aggregator / secondary
+# Every feed is health-checked on each collection run; failures are recorded
+# per provider (source_providers.last_status / last_error) and shown in Settings.
+# Before adding a source, check its terms and robots.txt. The collector also
+# checks robots.txt at runtime and skips disallowed feeds.
+
+sources:
+  # ---- Technology / AI (ORBIX) ----
+  - { id: openai-news, name: OpenAI News, kind: rss, url: "https://openai.com/news/rss.xml", homepage: "https://openai.com/news", tier: 1, topics: [ai, technology] }
+  - { id: google-ai-blog, name: Google — AI, kind: rss, url: "https://blog.google/technology/ai/rss/", homepage: "https://blog.google/technology/ai/", tier: 1, topics: [ai, technology] }
+  - { id: deepmind-blog, name: Google DeepMind, kind: rss, url: "https://deepmind.google/blog/rss.xml", homepage: "https://deepmind.google/discover/blog/", tier: 1, topics: [ai, science] }
+  - { id: huggingface-blog, name: Hugging Face Blog, kind: rss, url: "https://huggingface.co/blog/feed.xml", homepage: "https://huggingface.co/blog", tier: 1, topics: [ai, software] }
+  - { id: github-blog, name: The GitHub Blog, kind: rss, url: "https://github.blog/feed/", homepage: "https://github.blog", tier: 1, topics: [software, technology] }
+  - { id: nvidia-blog, name: NVIDIA Blog, kind: rss, url: "https://blogs.nvidia.com/feed/", homepage: "https://blogs.nvidia.com", tier: 1, topics: [ai, infrastructure] }
+  - { id: arxiv-cs-ai, name: arXiv cs.AI, kind: rss, url: "https://rss.arxiv.org/rss/cs.AI", homepage: "https://arxiv.org/list/cs.AI/recent", tier: 1, topics: [ai, research] }
+  - { id: mit-tech-review, name: MIT Technology Review, kind: rss, url: "https://www.technologyreview.com/feed/", homepage: "https://www.technologyreview.com", tier: 2, topics: [technology, ai] }
+  - { id: ars-technica, name: Ars Technica, kind: rss, url: "https://feeds.arstechnica.com/arstechnica/index", homepage: "https://arstechnica.com", tier: 2, topics: [technology, science] }
+  - { id: techcrunch, name: TechCrunch, kind: rss, url: "https://techcrunch.com/feed/", homepage: "https://techcrunch.com", tier: 2, topics: [technology, ai] }
+  - { id: the-verge, name: The Verge, kind: rss, url: "https://www.theverge.com/rss/index.xml", homepage: "https://www.theverge.com", tier: 2, topics: [technology] }
+
+  # ---- Geopolitics / regulation (APEX) ----
+  - { id: un-news, name: UN News, kind: rss, url: "https://news.un.org/feed/subscribe/en/news/all/rss.xml", homepage: "https://news.un.org", tier: 1, topics: [geopolitics, world] }
+  - { id: bbc-world, name: BBC News — World, kind: rss, url: "https://feeds.bbci.co.uk/news/world/rss.xml", homepage: "https://www.bbc.com/news/world", tier: 2, topics: [world, geopolitics] }
+  - { id: guardian-world, name: The Guardian — World, kind: rss, url: "https://www.theguardian.com/world/rss", homepage: "https://www.theguardian.com/world", tier: 2, topics: [world, geopolitics] }
+  - { id: aljazeera, name: Al Jazeera, kind: rss, url: "https://www.aljazeera.com/xml/rss/all.xml", homepage: "https://www.aljazeera.com", tier: 2, topics: [world, geopolitics] }
+
+  # ---- Kazakhstan / Central Asia ----
+  - { id: astana-times, name: The Astana Times, kind: rss, url: "https://astanatimes.com/feed/", homepage: "https://astanatimes.com", tier: 2, topics: [kazakhstan, central-asia], language: en }
+  - { id: times-central-asia, name: The Times of Central Asia, kind: rss, url: "https://timesca.com/feed/", homepage: "https://timesca.com", tier: 2, topics: [central-asia, kazakhstan], language: en }
+
+  # ---- Economics / markets (MERIDIAN) ----
+  - { id: fed-press, name: Federal Reserve — Press releases, kind: rss, url: "https://www.federalreserve.gov/feeds/press_all.xml", homepage: "https://www.federalreserve.gov", tier: 1, topics: [economics, monetary-policy] }
+  - { id: ecb-press, name: ECB — Press, kind: rss, url: "https://www.ecb.europa.eu/rss/press.html", homepage: "https://www.ecb.europa.eu", tier: 1, topics: [economics, monetary-policy] }
+  - { id: bbc-business, name: BBC News — Business, kind: rss, url: "https://feeds.bbci.co.uk/news/business/rss.xml", homepage: "https://www.bbc.com/news/business", tier: 2, topics: [economics, markets] }
+  - { id: guardian-economics, name: The Guardian — Economics, kind: rss, url: "https://www.theguardian.com/business/economics/rss", homepage: "https://www.theguardian.com/business/economics", tier: 2, topics: [economics] }
+
+  # ---- Science (LEXICON) ----
+  - { id: nature-news, name: Nature, kind: rss, url: "https://www.nature.com/nature.rss", homepage: "https://www.nature.com", tier: 1, topics: [science, research] }
+  - { id: science-news, name: Science — News, kind: rss, url: "https://www.science.org/rss/news_current.xml", homepage: "https://www.science.org/news", tier: 1, topics: [science, research] }
+  - { id: nasa-news, name: NASA News Releases, kind: rss, url: "https://www.nasa.gov/news-release/feed/", homepage: "https://www.nasa.gov/news/", tier: 1, topics: [science, space] }
+  - { id: nasa-science, name: NASA Science, kind: rss, url: "https://science.nasa.gov/feed/", homepage: "https://science.nasa.gov", tier: 1, topics: [science, space, climate] }
+  - { id: quanta, name: Quanta Magazine, kind: rss, url: "https://www.quantamagazine.org/feed/", homepage: "https://www.quantamagazine.org", tier: 2, topics: [science, research] }
+
+  # ---- History / culture / society (ARCHIVE) ----
+  - { id: aeon, name: Aeon, kind: rss, url: "https://aeon.co/feed.rss", homepage: "https://aeon.co", tier: 2, topics: [philosophy, culture, history] }
+  - { id: smithsonian, name: Smithsonian Magazine, kind: rss, url: "https://www.smithsonianmag.com/rss/latest_articles/", homepage: "https://www.smithsonianmag.com", tier: 2, topics: [history, culture] }
+  - { id: guardian-culture, name: The Guardian — Culture, kind: rss, url: "https://www.theguardian.com/culture/rss", homepage: "https://www.theguardian.com/culture", tier: 2, topics: [culture, society] }
+
+  # ---- Climate / energy (GAYA) ----
+  - { id: carbon-brief, name: Carbon Brief, kind: rss, url: "https://www.carbonbrief.org/feed/", homepage: "https://www.carbonbrief.org", tier: 2, topics: [climate, energy] }
+  - { id: yale-e360, name: Yale Environment 360, kind: rss, url: "https://e360.yale.edu/feed.xml", homepage: "https://e360.yale.edu", tier: 2, topics: [climate, environment] }
+  - { id: guardian-environment, name: The Guardian — Environment, kind: rss, url: "https://www.theguardian.com/environment/rss", homepage: "https://www.theguardian.com/environment", tier: 2, topics: [climate, environment] }
+  - { id: inside-climate, name: Inside Climate News, kind: rss, url: "https://insideclimatenews.org/feed/", homepage: "https://insideclimatenews.org", tier: 2, topics: [climate, energy] }

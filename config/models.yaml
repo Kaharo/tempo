@@ -1,0 +1,15 @@
+# Model providers and price table (USD per million tokens).
+# Prices from https://platform.claude.com/docs/en/about-claude/pricing (checked 2026-11-15).
+# Prices you don't know: leave null — tokens are still tracked, cost shows as "unknown".
+
+providers:
+  anthropic:         { kind: anthropic,         api_key_env: ANTHROPIC_API_KEY }
+  openai:            { kind: openai,            api_key_env: OPENAI_API_KEY, base_url: "https://api.openai.com/v1" }
+  gemini:            { kind: gemini,            api_key_env: GEMINI_API_KEY, base_url: "https://generativelanguage.googleapis.com/v1beta" }
+  compat:            { kind: openai_compatible, api_key_env: COMPAT_API_KEY, base_url_env: COMPAT_BASE_URL }
+  manual:            { kind: manual }   # development / manual-execution mode — see docs/AUTOMATION.md
+
+prices:
+  claude-opus-5-5:   { input: 4.0,  output: 20.0 }
+  claude-sonnet-5-5: { input: 2.0,  output: 10.0 }
+  claude-haiku-5-5:  { input: 0.10, output: 0.50 }   # ≤100K-token prompts

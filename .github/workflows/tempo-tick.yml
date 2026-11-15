@@ -1,0 +1,32 @@
+# Primary scheduler clock. Runs the idempotent tick every 15 minutes; the tick
+# decides which stages are due from the schedule stored in the database
+# (editable in Settings), so changing times never requires editing this file.
+name: tempo-tick
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+    inputs:
+      command:
+        description: "CLI command (tick | run | run --force | stage <name> --force)"
+        default: "tick"
+concurrency: { group: tempo-tick, cancel-in-progress: false }
+jobs:
+  tick:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      TEMPO_ADMIN_EMAIL: ${{ secrets.TEMPO_ADMIN_EMAIL }}
+      TEMPO_TIMEZONE: Asia/Almaty
+      TEMPO_DAILY_BUDGET_USD: ${{ vars.TEMPO_DAILY_BUDGET_USD || '3' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: npm ci --legacy-peer-deps
+      - run: npm run db:migrate
+      - run: npm run tempo -- ${{ github.event.inputs.command || 'tick' }}

@@ -1,0 +1,44 @@
+# Pipeline defaults. Values here seed the `settings` table on first run;
+# after that, edit them in Settings (stored in the database).
+
+timezone: Asia/Almaty
+
+# Local times (HH:MM) at which each stage becomes due.
+schedule:
+  collect: "06:00"
+  process: "06:15"   # dedupe + verify + score + route
+  agents: "06:30"
+  assemble: "07:00"
+  publish: "07:30"
+
+retry:
+  max_attempts: 3
+  backoff_seconds: [30, 120, 600]
+
+collection:
+  lookback_hours: 72        # items older than this are ignored for the edition
+  max_items_per_source: 30
+  request_timeout_ms: 15000
+  user_agent: "TEMPO/0.1 (personal news reader; contact: owner)"
+  min_interval_minutes_per_source: 30   # rate limit per source
+
+clustering:
+  window_hours: 120   # weekly publishers (essays, analysis) need a wider window; novelty decays by age
+  title_similarity_threshold: 0.42
+
+ranking:
+  # Final score = Σ weight × signal (each signal is 0..1). Editable in Settings.
+  weights:
+    personal_interest: 0.25
+    editorial_importance: 0.20
+    novelty: 0.15
+    reliability: 0.20
+    project_relevance: 0.10
+    long_term_significance: 0.10
+  long_term_topics: [ai, climate, energy, monetary-policy, geopolitics, research]
+  max_clusters_per_agent: 4
+
+edition:
+  perspectives: 6
+  supporting_articles: 4
+  world_items: 8

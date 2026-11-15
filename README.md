@@ -1,36 +1,21 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# TEMPO
 
-## Getting Started
+Personal AI information environment. Collects news from authoritative sources, clusters and verifies stories, has six independent editorial agents (N4U[42]) write source-grounded perspectives and analysis, and publishes a daily edition on a schedule.
 
-First, run the development server:
+**Status (2026-11-15):** pipeline, data model, agents, scheduler and auth work end to end; the first real edition (2026-11-15) was produced in manual mode. The visual UI waits for the approved design screenshots — see docs/BACKLOG.md.
 
+## Quick start (local)
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+cp .env.example .env.local            # fill DATABASE_URL, SESSION_SECRET, TEMPO_ADMIN_PASSWORD, CRON_SECRET
+npm install --legacy-peer-deps
+npm run db:migrate
+npm run tempo -- sync                 # registers sources and agents
+npm run tempo -- run                  # full chain for today (needs ANTHROPIC_API_KEY, or TEMPO_MODE=manual)
+npm run dev                           # http://localhost:3000 → login → today's edition
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## How it works
+`collect → process (dedupe · verify · score · route) → agents → assemble → publish`, each stage idempotent per date, with job history, retries and logs. See docs/AUTOMATION.md.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Docs
+PRODUCT · ARCHITECTURE · DESIGN_SYSTEM · EDITORIAL_SYSTEM · AUTOMATION · INTEGRATIONS · DEPLOYMENT · ROADMAP · BACKLOG — all in `docs/`.

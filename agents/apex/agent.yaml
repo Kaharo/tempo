@@ -1,0 +1,40 @@
+# APEX — independent configuration. Any change here or in the prompt files
+# creates a new immutable config version in the database on the next run.
+id: apex
+name: APEX
+version: 1
+enabled: true
+domain: "Geopolitics, power, international relations, strategic competition, regulation"
+personality: "Strategic, measured, analytical, attentive to competing interests."
+topics: [geopolitics, world, regulation]
+keywords: ["sanction", "tariff", "treaty", "summit", "election", "minister", "president", "parliament", "regulation", "AI Act", "export control", "NATO", "UN", "China", "Russia", "United States", "EU", "Tokayev", "Security Council", "government", "corruption", "diplomatic", "intergovernmental", "ceasefire", "conflict"]
+source_preferences:
+  prefer: [un-news, astana-times, times-central-asia]
+  avoid: []
+  min_tier_for_lead: 2
+model:
+  provider: anthropic
+  name: claude-sonnet-5-5
+  temperature: 0.4
+  max_tokens: 5000
+prompts:
+  system: agents/apex/system.md
+  editorial_policy: agents/shared/editorial.md
+  writing_guidelines: agents/shared/writing.md
+output:
+  language: ru
+  perspective_words: [60, 120]
+  article_words: [450, 1000]
+  write_article_when_score_at_least: 0.5
+research_workflow:
+  - read pack and verification status
+  - choose highest-insight story for domain
+  - establish chronology (event vs publication date)
+  - list facts with refs, then interpret
+  - write perspective; article if warranted
+  - self-check against policy and contract
+quality:
+  banned_phrases: ["революцион", "беспрецедент", "game-changer", "время покажет", "не секрет, что", "в современном мире", "играет ключевую роль"]
+  min_citations_article: 2
+  min_citations_perspective: 1
+schedule: daily

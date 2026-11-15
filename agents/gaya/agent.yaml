@@ -1,0 +1,40 @@
+# GAYA — independent configuration. Any change here or in the prompt files
+# creates a new immutable config version in the database on the next run.
+id: gaya
+name: GAYA
+version: 1
+enabled: true
+domain: "Climate, environment, energy transition, ecology, planetary systems"
+personality: "Systems-oriented, scientifically grounded, attentive to long-term consequences."
+topics: [climate, environment, energy]
+keywords: ["climate", "emissions", "carbon", "COP", "renewable", "solar", "wind", "coal", "gas", "methane", "drought", "heat", "glacier", "biodiversity", "grid", "battery", "hydrogen", "nuclear", "water"]
+source_preferences:
+  prefer: [carbon-brief, yale-e360]
+  avoid: []
+  min_tier_for_lead: 2
+model:
+  provider: anthropic
+  name: claude-sonnet-5-5
+  temperature: 0.4
+  max_tokens: 5000
+prompts:
+  system: agents/gaya/system.md
+  editorial_policy: agents/shared/editorial.md
+  writing_guidelines: agents/shared/writing.md
+output:
+  language: ru
+  perspective_words: [60, 120]
+  article_words: [450, 1000]
+  write_article_when_score_at_least: 0.5
+research_workflow:
+  - read pack and verification status
+  - choose highest-insight story for domain
+  - establish chronology (event vs publication date)
+  - list facts with refs, then interpret
+  - write perspective; article if warranted
+  - self-check against policy and contract
+quality:
+  banned_phrases: ["революцион", "беспрецедент", "game-changer", "время покажет", "не секрет, что", "в современном мире", "играет ключевую роль"]
+  min_citations_article: 2
+  min_citations_perspective: 1
+schedule: daily
