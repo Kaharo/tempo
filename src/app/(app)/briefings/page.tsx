@@ -1,5 +1,6 @@
 import { briefingSources, listBriefings } from "@/lib/briefings";
 import { PageHead, fmtDate } from "@/components/ui";
+import { deleteBriefing } from "./actions";
 export const dynamic = "force-dynamic";
 export default async function Briefings() {
   const [all, sources] = [await listBriefings(60), briefingSources()];
@@ -21,7 +22,7 @@ export default async function Briefings() {
                   {i.body && <p style={{ whiteSpace: "pre-line" }}>{i.body}</p>}
                 </li>))}
               </ul>
-              <p className="fine">Получено {fmtDate(b.updatedAt, true)}</p>
+              <form action={deleteBriefing} className="fine"><input type="hidden" name="id" value={b.id} />Получено {fmtDate(b.updatedAt, true)} · <button style={{ borderBottom: "1px solid currentColor" }}>удалить</button></form>
             </div>
           ))}
         </section>
