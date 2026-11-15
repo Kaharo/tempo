@@ -1,0 +1,7 @@
+# External agents allowed to push summaries into TEMPO.
+# slot decides where the latest summary surfaces on the overview:
+#   aimos → AIMos block · finance → Finance block · day → line under the masthead
+sources:
+  - { id: aimos-digest,  name: "AIMos — обзор AI-новостей",      slot: aimos }
+  - { id: morning-brief, name: "Утренняя сводка",                slot: day }
+  - { id: investment,    name: "Инвестиционный ассистент",       slot: finance }

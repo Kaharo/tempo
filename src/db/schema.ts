@@ -386,3 +386,24 @@ export type EditionLayout = {
   ideaArticleIds: string[];
   notes: string[];
 };
+
+// ---------- external agent briefings ----------
+/** Summaries pushed by agents that run outside TEMPO (scheduled Claude tasks etc.). */
+export const briefings = pgTable("briefings", {
+  id: id(),
+  source: text("source").notNull(), // id from config/briefings.yaml
+  editionDate: date("edition_date").notNull(),
+  headline: text("headline"),
+  createdAt: created(),
+  updatedAt: updated(),
+}, (t) => [uniqueIndex("briefings_source_date").on(t.source, t.editionDate)]);
+
+export const briefingItems = pgTable("briefing_items", {
+  id: id(),
+  briefingId: uuid("briefing_id").notNull().references(() => briefings.id, { onDelete: "cascade" }),
+  position: integer("position").notNull(),
+  title: text("title").notNull(),
+  body: text("body"),
+  url: text("url"),
+  createdAt: created(),
+}, (t) => [uniqueIndex("briefing_items_pos").on(t.briefingId, t.position)]);

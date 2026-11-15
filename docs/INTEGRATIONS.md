@@ -16,3 +16,16 @@ All integrations are rows in `integrations` with an explicit state: `connected`,
 | X | publishing | paid API tier | disconnected | Write access requires a paid tier |
 
 **Before connecting any publishing channel:** approvals must exist (`approvals` row bound to draft version/channel/language/window). `distribution_jobs.idempotency_key` prevents double posting.
+
+## External agents → TEMPO (summaries)
+Agents that run outside TEMPO push short summaries through `GET|POST /api/ingest/briefing` with `INGEST_TOKEN`. Allowed sources and where they surface are in `config/briefings.yaml`.
+
+| Source id | Agent | Shown on the overview |
+|---|---|---|
+| `aimos-digest` | Scheduled Claude task "AIMos — ежедневный обзор AI-новостей" | AIMos block, line "Подборка" |
+| `morning-brief` | Scheduled Claude task "Morning brief" | line under the masthead |
+| `investment` | Scheduled Claude task "Investment Research Assistant" | Finance block (until market data is connected) |
+
+Parameters: `source`, optional `date` (YYYY-MM-DD, default today in Asia/Almaty), `headline`, and per item `n` (1–12), `title`, `text` (≤2000 chars), `url` (http/https only). Calls are idempotent per (source, date, n). All summaries: `/briefings`.
+
+GET exists because scheduled Claude sessions can reach the app only through the Vercel connector's fetch tool. The token can only write summaries; it is stored in the prompts of those scheduled tasks. Rotate it by changing `INGEST_TOKEN` and the prompts.

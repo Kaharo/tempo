@@ -1,10 +1,9 @@
-# Primary scheduler clock. Runs the idempotent tick every 15 minutes; the tick
-# decides which stages are due from the schedule stored in the database
-# (editable in Settings), so changing times never requires editing this file.
+# Optional clock / manual runner. The production clock is Vercel Cron (vercel.json).
+# To get a precise 15-minute clock, add the secrets below and uncomment the schedule.
 name: tempo-tick
 on:
-  schedule:
-    - cron: "*/15 * * * *"
+  # schedule:
+  #   - cron: "*/15 * * * *"
   workflow_dispatch:
     inputs:
       command:

@@ -1,4 +1,14 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "crons": [{ "path": "/api/cron/tick", "schedule": "45 2 * * *" }]
+  "installCommand": "npm install --legacy-peer-deps",
+  "buildCommand": "npm run build:vercel",
+  "crons": [
+    { "path": "/api/cron/tick", "schedule": "5 1 * * *" },
+    { "path": "/api/cron/tick", "schedule": "20 1 * * *" },
+    { "path": "/api/cron/tick", "schedule": "35 1 * * *" },
+    { "path": "/api/cron/tick", "schedule": "5 2 * * *" },
+    { "path": "/api/cron/tick", "schedule": "35 2 * * *" },
+    { "path": "/api/cron/tick", "schedule": "30 3 * * *" },
+    { "path": "/api/cron/tick", "schedule": "0 5 * * *" }
+  ]
 }

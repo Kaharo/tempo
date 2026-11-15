@@ -29,3 +29,6 @@ Legend: ✅ done · 🔄 in progress · ⏸ blocked · ⏳ next
 | 23 | Browser checks at 1600/768/390 for every page; project and approval flows | ✅ | — |
 | 24 | Weather line in masthead (needs a weather source) | ⏳ decision | — |
 | 25 | Per-agent enable/model editing from the UI (now via agents/*.yaml) | ⏳ | — |
+| 26 | External agent summaries: storage, endpoint, overview slots, /briefings | ✅ | — |
+| 27 | Build-time bootstrap (migrations + first edition), Vercel Cron clock, edition without editors | ✅ | — |
+| 28 | N4U[42] editors via a scheduled Claude task (no API key) | ⏳ idea | 26 |

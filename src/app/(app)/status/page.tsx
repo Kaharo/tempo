@@ -20,6 +20,7 @@ export default async function Status() {
       <PageHead kicker="Уведомления" title={FR[f.state]} dek="Журнал этапов, ошибки и расходы. Всё, что требует внимания, появляется здесь." />
       <form action={reassemble}><button className="btn">Пересобрать сегодняшний выпуск</button></form>
       <p className="fine">Пересборка берёт уже готовые тексты и создаёт новую версию выпуска. Полный перезапуск с редакторами: npm run tempo -- run --force</p>
+      <p style={{ marginTop: 20 }}><a href="/briefings" className="arrow" style={{ borderBottom: "1px solid currentColor" }}>Сводки агентов →</a></p>
       <h2>Требует внимания</h2>
       {problems.length ? <ul className="list">{problems.map((l) => <li key={l.id}><div className="proj-h"><span style={{ fontWeight: 400 }}>{l.message}</span><span className={`tag${l.level === "error" ? " solid" : ""}`}>{l.level === "error" ? "ошибка" : "предупреждение"}</span></div><p className="cap">{l.scope} · {fmtDate(l.createdAt, true)}</p></li>)}</ul> : <p className="empty" style={{ padding: "18px 0" }}>Ничего.</p>}
       <h2>Этапы</h2>

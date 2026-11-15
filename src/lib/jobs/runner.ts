@@ -28,13 +28,20 @@ async function execute(stage: Stage, editionDate: string, force: boolean, jobRun
     case "agents": {
       const budget = Number(process.env.TEMPO_DAILY_BUDGET_USD ?? 3);
       const results: AgentRunResult[] = [];
-      for (const id of listAgentIds()) {
-        if ((await spentToday(editionDate)) >= budget) { results.push({ agentId: id, status: "skipped", detail: `daily budget $${budget} reached` }); continue; }
-        results.push(await runAgent(id, editionDate, { jobRunId }));
-      }
+      // Three at a time: fits a serverless time limit without hammering the provider.
+      const queue = [...listAgentIds()];
+      await Promise.all(Array.from({ length: 3 }, async () => {
+        for (let id = queue.shift(); id; id = queue.shift()) {
+          if ((await spentToday(editionDate)) >= budget) { results.push({ agentId: id, status: "skipped", detail: `daily budget $${budget} reached` }); continue; }
+          results.push(await runAgent(id, editionDate, { jobRunId }).catch((e) => ({ agentId: id!, status: "failed" as const, detail: (e as Error).message })));
+        }
+      }));
       const failed = results.filter((r) => r.status === "failed");
       const pending = results.filter((r) => r.status === "pending_manual");
-      if (failed.length === results.length) throw new Error(`All agents failed: ${failed.map((f) => `${f.agentId}: ${f.detail}`).join(" | ")}`);
+      // No model access is a configuration state, not a crash: the edition is still assembled from verified stories.
+      const noProvider = failed.length > 0 && failed.every((f) => f.detail?.startsWith("provider "));
+      if (noProvider) await log("warn", "agents", `Editors did not run: ${failed[0].detail}`, undefined, jobRunId);
+      else if (failed.length === results.length && results.length > 0) throw new Error(`All agents failed: ${failed.map((f) => `${f.agentId}: ${f.detail}`).join(" | ")}`);
       return { results, failed: failed.length, pendingManual: pending.length, costUsd: results.reduce((s, r) => s + (r.costUsd ?? 0), 0) };
     }
     case "assemble": return (await assembleEdition(editionDate, { force, mode: mode(), jobRunId })).edition;
@@ -87,7 +94,8 @@ export async function runAll(editionDate: string, trigger: Trigger = "manual", f
  * not succeeded today, in order. Safe to call any number of times.
  * Failed stages are retried on later ticks after their backoff elapses.
  */
-export async function tick(now = new Date()) {
+export async function tick(now = new Date(), budgetMs = 230_000) {
+  const started = Date.now();
   const cfg = await getPipelineConfig();
   const tz = process.env.TEMPO_TIMEZONE ?? cfg.timezone;
   const date = localDate(tz, now);
@@ -95,6 +103,7 @@ export async function tick(now = new Date()) {
   const ran: { stage: Stage; status: string; note?: string }[] = [];
   for (const stage of STAGES) {
     if (hhmm < cfg.schedule[stage]) break; // later stages not due yet
+    if (Date.now() - started > budgetMs) { ran.push({ stage, status: "deferred_to_next_tick" }); break; }
     const last = await db.query.jobRuns.findFirst({ where: eq(schema.jobRuns.idempotencyKey, `${stage}:${date}`), orderBy: desc(schema.jobRuns.createdAt) });
     if (last?.status === "succeeded") continue;
     if (last?.status === "failed") {

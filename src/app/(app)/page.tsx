@@ -4,6 +4,7 @@ import { getEdition } from "@/lib/edition/read";
 import { editionFreshness } from "@/lib/jobs/runner";
 import { AGENT_KICKER, aimosSummary, financeSummary, fmtPct, plural, progressSummary, projectsSummary, readMinutes } from "@/lib/home";
 import { Bars, Sparkline } from "@/components/charts";
+import { latestBriefings } from "@/lib/briefings";
 
 export const dynamic = "force-dynamic";
 const TZ = process.env.TEMPO_TIMEZONE ?? "Asia/Almaty";
@@ -18,13 +19,16 @@ function dateLine(d: Date) {
 export default async function Home({ searchParams }: { searchParams: Promise<{ date?: string }> }) {
   const sp = await searchParams;
   const date = sp.date && /^\d{4}-\d{2}-\d{2}$/.test(sp.date) ? sp.date : undefined;
-  const [data, fresh, fin, projects, progress, aimos] = await Promise.all([getEdition({ date }), editionFreshness(), financeSummary(), projectsSummary(), progressSummary(), aimosSummary()]);
+  const [data, fresh, fin, projects, progress, aimos, briefs] = await Promise.all([getEdition({ date }), editionFreshness(), financeSummary(), projectsSummary(), progressSummary(), aimosSummary(), latestBriefings(date)]);
+  const slot = (s: string) => briefs.find((b) => b.slot === s);
+  const [bDay, bFin, bAimos] = [slot("day"), slot("finance"), slot("aimos")];
+  const dm = (d: string) => d.split("-").reverse().slice(0, 2).join(".");
   const state = date ? `архивный выпуск ${date.split("-").reverse().join(".")}` : STATE[data ? fresh.state : "unavailable"];
 
   if (!data) {
     return (
       <>
-        <div className="dateline">{dateLine(new Date())} · Астана · {state}</div>
+        <div className="dateline">{dateLine(new Date())} · Астана · {state}{bDay && <> · <Link href="/briefings#morning-brief" className="u">{bDay.headline ?? bDay.name} →</Link></>}</div>
         <div className="page"><div className="kicker">Обзор дня</div><h1>Выпуска пока нет</h1>
           <p className="dek">Конвейер ещё не собрал ни одного выпуска. Состояние этапов и ошибки — в разделе «Уведомления».</p>
           <Link className="btn" href="/status">Открыть состояние <ArrowRight size={16} /></Link></div>
@@ -43,7 +47,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ d
 
   return (
     <>
-      <div className={`dateline${state ? "" : " wide-hidden"}`}>{dateLine(new Date(`${e.date}T12:00:00Z`))} · Астана{state && ` · ${state}`}</div>
+      <div className={`dateline${state || bDay ? "" : " wide-hidden"}`}>{dateLine(new Date(`${e.date}T12:00:00Z`))} · Астана{state && ` · ${state}`}{bDay && <> · <Link href="/briefings#morning-brief" className="u">{bDay.headline ?? bDay.name} →</Link></>}</div>
       <div className="home">
         <section className="lead-area">
           {lead ? (
@@ -86,6 +90,8 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ d
                 <Sparkline values={fin.series} />
                 <p className="note">{fin.instrument} · {fin.source}</p>
               </>
+            ) : bFin ? (
+              <p className="empty"><b>{bFin.headline ?? bFin.items[0]?.title ?? bFin.name}</b>{bFin.items[0]?.body && <>{bFin.items[0].body.slice(0, 180)}{bFin.items[0].body.length > 180 && "…"} </>}<Link href="/briefings#investment">Сводка ассистента от {dm(bFin.date)}</Link></p>
             ) : <p className="empty"><b>Нет данных</b>Источник котировок не подключён, поэтому изменений показать нечего. <Link href="/finance">Подробнее</Link></p>}
           </div>
           <div className="data-col">
@@ -127,6 +133,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ d
               <div><div className="stat">{aimos.drafts}</div><div className="stat-l">{plural(aimos.drafts, "черновик", "черновика", "черновиков")}</div></div>
               <div><div className="stat">{aimos.pending}</div><div className="stat-l">ждёт решения</div></div>
             </div>
+            {bAimos && <Link href="/briefings#aimos-digest" className="line"><span>Подборка от {dm(bAimos.date)}</span><span className="val"><b>{bAimos.items.length}</b> {plural(bAimos.items.length, "новость", "новости", "новостей")} <ArrowRight size={14} strokeWidth={1.75} /></span></Link>}
             <Link href="/aimos" className="line"><span>Охват</span><span className="val">{aimos.reachDelta == null ? <span className="muted">нет данных</span> : <><b>{fmtPct(aimos.reachDelta)}</b> за неделю</>} <ArrowRight size={14} strokeWidth={1.75} /></span></Link>
             <Link href="/publications" className="line strong"><span>Согласовать публикацию</span><ArrowRight size={16} strokeWidth={1.75} /></Link>
           </div>

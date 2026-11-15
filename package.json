@@ -11,7 +11,9 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "test": "vitest run",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "bootstrap": "tsx --env-file-if-exists=.env.local --tsconfig tsconfig.json scripts/bootstrap.ts",
+    "build:vercel": "npm run bootstrap && next build"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.8.0",
@@ -40,5 +42,8 @@
     "typescript": "^5",
     "vite": "^8.3.8",
     "vitest": "^5.1.0"
+  },
+  "engines": {
+    "node": ">=20"
   }
 }
