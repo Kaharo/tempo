@@ -22,7 +22,7 @@ export async function GET(req: Request) {
       .from(schema.editions).orderBy(desc(schema.editions.editionDate), desc(schema.editions.version)).limit(6),
     db.select({ status: schema.sourceProviders.lastStatus, n: sql<number>`count(*)::int`, last: sql<string>`max(${schema.sourceProviders.lastFetchedAt})::text` }).from(schema.sourceProviders).groupBy(schema.sourceProviders.lastStatus),
     db.select({ n: sql<number>`count(*)::int`, last24h: sql<number>`count(*) filter (where ${schema.sourceItems.retrievedAt} > now() - interval '24 hours')::int`, clusters: sql<number>`(select count(*) from story_clusters)::int` }).from(schema.sourceItems),
-    db.select({ source: schema.briefings.source, date: schema.briefings.editionDate, updated: schema.briefings.updatedAt, hasHeadline: sql<boolean>`${schema.briefings.headline} is not null`, items: sql<number>`(select count(*) from briefing_items i where i.briefing_id = ${schema.briefings.id})::int` })
+    db.select({ source: schema.briefings.source, date: schema.briefings.editionDate, updated: schema.briefings.updatedAt, hasHeadline: sql<boolean>`${schema.briefings.headline} is not null`, items: sql<number>`(select count(*) from briefing_items i where i.briefing_id = "briefings"."id")::int` })
       .from(schema.briefings).orderBy(desc(schema.briefings.updatedAt)).limit(12),
     db.select({ agent: schema.agentRuns.agentId, date: schema.agentRuns.editionDate, status: schema.agentRuns.status, provider: schema.agentRuns.providerId, error: schema.agentRuns.error })
       .from(schema.agentRuns).where(gte(schema.agentRuns.createdAt, since)).orderBy(desc(schema.agentRuns.createdAt)).limit(12),
