@@ -16,7 +16,7 @@ model:
   provider: anthropic
   name: claude-sonnet-5-5
   temperature: 0.4
-  max_tokens: 5000
+  max_tokens: 12000
 prompts:
   system: agents/gaya/system.md
   editorial_policy: agents/shared/editorial.md

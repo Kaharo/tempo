@@ -28,9 +28,9 @@ async function execute(stage: Stage, editionDate: string, force: boolean, jobRun
     case "agents": {
       const budget = Number(process.env.TEMPO_DAILY_BUDGET_USD ?? 3);
       const results: AgentRunResult[] = [];
-      // Three at a time: fits a serverless time limit without hammering the provider.
+      // All six in parallel: reasoning models take a minute or more each and the stage must fit a serverless time limit.
       const queue = [...listAgentIds()];
-      await Promise.all(Array.from({ length: 3 }, async () => {
+      await Promise.all(Array.from({ length: 6 }, async () => {
         for (let id = queue.shift(); id; id = queue.shift()) {
           if ((await spentToday(editionDate)) >= budget) { results.push({ agentId: id, status: "skipped", detail: `daily budget $${budget} reached` }); continue; }
           results.push(await runAgent(id, editionDate, { jobRunId }).catch((e) => ({ agentId: id!, status: "failed" as const, detail: (e as Error).message })));
