@@ -100,3 +100,13 @@ describe("agent configs & QA gate", () => {
     expect(validateOutput(bad, cfg, 2, new Set(["c1"])).errors.join()).toMatch(/banned/);
   });
 });
+
+import { readSse } from "@/lib/ai/providers/openai";
+describe("streaming answers", () => {
+  it("joins content deltas split across network chunks and reads usage", async () => {
+    const sse = 'data: {"model":"m","choices":[{"delta":{"content":"{\\"ok\\":"}}]}\n\ndata: {"choices":[{"delta":{"reasoning":"skip me"}}]}\n\ndata: {"choices":[{"delta":{"content":" true}"}}]}\n\ndata: {"choices":[],"usage":{"prompt_tokens":12,"completion_tokens":5}}\n\ndata: [DONE]\n\n';
+    const bytes = new TextEncoder().encode(sse);
+    const stream = new ReadableStream<Uint8Array>({ start(c) { for (let i = 0; i < bytes.length; i += 37) c.enqueue(bytes.slice(i, i + 37)); c.close(); } });
+    expect(await readSse(stream)).toEqual({ text: '{"ok": true}', inputTokens: 12, outputTokens: 5, model: "m" });
+  });
+});
