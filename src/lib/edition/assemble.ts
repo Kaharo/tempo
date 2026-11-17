@@ -54,9 +54,12 @@ export async function assembleEdition(editionDate: string, opts: { force?: boole
   };
   const notes: string[] = [];
   const missingAgents = agentOrder.filter((a) => !persp.some((p) => p.agentId === a));
-  if (missingAgents.length) notes.push(`No perspective from: ${missingAgents.join(", ")}`);
+  if (missingAgents.length) notes.push(`Нет мнения от: ${missingAgents.map((a) => a.toUpperCase()).join(", ")}`);
   if (!okRuns.length) notes.splice(0, notes.length, "Редакторы не запускались: нет доступа к модели");
-  const status = lead && perspectiveIds.length === agentOrder.length ? "complete" : lead || perspectiveIds.length || worldIds.length ? "incomplete" : "failed";
+  // Without a long article the overview leads with the strongest editor perspective ("news of the day").
+  if (!lead && perspectiveIds.length) completeness.lead = "from_perspective";
+  const full = perspectiveIds.length === agentOrder.length && (lead || perspectiveIds.length > 0);
+  const status = full ? "complete" : lead || perspectiveIds.length || worldIds.length ? "incomplete" : "failed";
 
   const layout: EditionLayout = { leadArticleId: lead?.id ?? null, supportingArticleIds: supporting, perspectiveIds, worldClusterIds: worldIds, ideaArticleIds: [], notes };
   const [edition] = await db.insert(schema.editions).values({

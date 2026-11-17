@@ -2,7 +2,7 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { getEdition } from "@/lib/edition/read";
 import { editionFreshness } from "@/lib/jobs/runner";
-import { AGENT_KICKER, aimosSummary, financeSummary, fmtPct, plural, progressSummary, projectsSummary, readMinutes } from "@/lib/home";
+import { AGENT_KICKER, VERIFY_LABEL, aimosSummary, financeSummary, fmtPct, plural, progressSummary, projectsSummary, readMinutes } from "@/lib/home";
 import { Bars, Sparkline } from "@/components/charts";
 import { latestBriefings } from "@/lib/briefings";
 
@@ -40,7 +40,11 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ d
   const side = [
     ...supporting.filter(Boolean).map((a) => ({ key: a!.id, href: `/article/${a!.id}`, kicker: AGENT_KICKER[a!.agentId] ?? a!.agentId, title: a!.headline, text: a!.dek ?? "", ext: false })),
     ...world.map((w) => ({ key: w.id, href: w.sources[0]?.url ?? "/world", kicker: w.sources[0]?.publisher ?? "Мир", title: w.label, text: "", ext: true })),
-  ].slice(0, 3);
+  ].slice(0, 4);
+  // "News of the day" is always present: article → strongest perspective → top verified story.
+  const leadView = !lead && perspectives.length ? [...perspectives].sort((a, b) => b.clusterScore - a.clusterScore)[0] : null;
+  const leadStory = !lead && !leadView ? world[0] ?? null : null;
+  if (leadStory) side.splice(0, side.length, ...side.filter((x) => x.key !== leadStory.id));
   const sourcesN = lead?.citations.length ?? 0;
   const mins = lead ? readMinutes(lead.body) : 0;
   const published = e.publishedAt ? new Intl.DateTimeFormat("ru-RU", { timeZone: TZ, day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" }).format(new Date(e.publishedAt)) : null;
@@ -63,11 +67,33 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ d
                 <span className="m time">{mins} {plural(mins, "минута", "минуты", "минут")}</span>
               </div>
             </article>
+          ) : leadView ? (
+            <article className="lead">
+              <div className="kicker">Новость дня · {AGENT_KICKER[leadView.agentId] ?? leadView.agentId}</div>
+              <h1><Link href={`/n4u${date ? `?date=${date}` : ""}#${leadView.agentId}`}>{leadView.headline}</Link></h1>
+              <div className="body"><p>{leadView.body}</p></div>
+              <div className="lead-meta">
+                <Link href={`/n4u${date ? `?date=${date}` : ""}#${leadView.agentId}`} className="arrow"><span>Источники</span><ArrowRight size={18} strokeWidth={1.75} /></Link>
+                <span className="m">Факты: {leadView.citations.length} {plural(leadView.citations.length, "источник", "источника", "источников")}</span>
+                <span className="m">Мнение: {leadView.agentName}</span>
+              </div>
+            </article>
+          ) : leadStory ? (
+            <article className="lead">
+              <div className="kicker">Новость дня · {leadStory.sources[0]?.publisher ?? "Мир"}</div>
+              <h1><a href={leadStory.sources[0]?.url} target="_blank" rel="noreferrer">{leadStory.label}</a></h1>
+              <p className="dek">Заголовок первоисточника. Редакторы N4U[42] этот выпуск не разбирали, поэтому анализа нет.</p>
+              <div className="lead-meta">
+                <a href={leadStory.sources[0]?.url} target="_blank" rel="noreferrer" className="arrow"><span>Читать в источнике</span><ArrowRight size={18} strokeWidth={1.75} /></a>
+                <span className="m">{leadStory.sources.length} {plural(leadStory.sources.length, "источник", "источника", "источников")}</span>
+                <span className="m">{VERIFY_LABEL[leadStory.verification]}</span>
+              </div>
+            </article>
           ) : (
-            <div className="lead"><div className="kicker">Обзор дня</div><h1>Главной статьи в этом выпуске нет</h1><p className="dek">{e.notes.join(" · ") || "Редакторы не подготовили материал, прошедший проверку."}</p></div>
+            <div className="lead"><div className="kicker">Обзор дня</div><h1>Новостей в этом выпуске нет</h1><p className="dek">{e.notes.join(" · ") || "Источники не дали материалов."}</p></div>
           )}
           <div className="stories">
-            {side.map((s) => (
+            {side.slice(0, 3).map((s) => (
               <Link key={s.key} href={s.href} className="story" {...(s.ext ? { target: "_blank", rel: "noreferrer" } : {})}>
                 <div className="kicker">{s.kicker}</div>
                 <h3>{s.title}</h3>

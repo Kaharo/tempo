@@ -128,7 +128,7 @@ export async function runAgent(agentId: string, editionDate: string, opts: { job
   return { agentId, status: "failed", runId: run.id, detail: lastErrors.join("; ") };
 }
 
-async function persistOutput(o: AgentOutput, agentId: string, runId: string, editionDate: string, pack: Pack) {
+export async function persistOutput(o: AgentOutput, agentId: string, runId: string, editionDate: string, pack: Pack) {
   const byN = new Map(pack.sources.map((s) => [s.n, s]));
   // Renumber citations densely per text so the reader sees [1], [2], … in order.
   const citationsFor = (nums: number[]) => {
