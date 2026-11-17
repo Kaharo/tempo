@@ -37,8 +37,16 @@ export function estimateCost(model: string, inTok: number | null, outTok: number
   return (inTok * p.input + outTok * p.output) / 1_000_000;
 }
 
-/** TEMPO_MODE=manual forces every agent through the manual provider (no API keys needed). */
-export function resolveProvider(preferred: string): ModelProvider {
-  if (process.env.TEMPO_MODE === "manual") return getProvider("manual");
-  return getProvider(preferred);
+/**
+ * Which provider and model an agent actually runs on:
+ *  - TEMPO_MODE=manual → manual provider (no API keys needed)
+ *  - TEMPO_MODEL_PROVIDER (+ TEMPO_MODEL) → one provider for every agent, without editing agent files
+ *  - otherwise the agent's own `model:` block
+ */
+export function resolveModel(agentProvider: string, agentModel: string): { provider: ModelProvider; model: string } {
+  if (process.env.TEMPO_MODE === "manual") return { provider: getProvider("manual"), model: agentModel };
+  const override = process.env.TEMPO_MODEL_PROVIDER;
+  if (override) return { provider: getProvider(override), model: process.env.TEMPO_MODEL || agentModel };
+  return { provider: getProvider(agentProvider), model: agentModel };
 }
+export const resolveProvider = (preferred: string) => resolveModel(preferred, "").provider;

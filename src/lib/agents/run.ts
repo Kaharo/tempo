@@ -6,7 +6,7 @@ import { db, schema } from "@/db/client";
 import type { Citation, ArticleBlock } from "@/db/schema";
 import { getPipelineConfig } from "@/lib/settings";
 import { log } from "@/lib/log";
-import { estimateCost, resolveProvider } from "@/lib/ai/registry";
+import { estimateCost, resolveModel } from "@/lib/ai/registry";
 import { ManualResponsePending } from "@/lib/ai/types";
 import { loadAgent, type LoadedAgent } from "./config";
 import { AgentOutput, extractJson, validateOutput } from "./output";
@@ -73,7 +73,7 @@ export async function runAgent(agentId: string, editionDate: string, opts: { job
     await log("warn", `agent:${agentId}`, "No routed stories — skipped", undefined, opts.jobRunId);
     return { agentId, status: "skipped", detail: "no routed stories" };
   }
-  const provider = resolveProvider(agent.config.model.provider);
+  const { provider, model: modelName } = resolveModel(agent.config.model.provider, agent.config.model.name);
   const avail = provider.available();
   if (!avail.ok) return { agentId, status: "failed", detail: `provider ${provider.id} unavailable: ${avail.reason}` };
 
@@ -85,7 +85,7 @@ export async function runAgent(agentId: string, editionDate: string, opts: { job
   const promptHash = createHash("sha256").update(system + pack.text).digest("hex").slice(0, 16);
   const runKey = `${editionDate}-${agentId}-${promptHash.slice(0, 8)}`;
   const [run] = await db.insert(schema.agentRuns).values({
-    agentId, configVersion: version, editionDate, providerId: provider.id, model: agent.config.model.name,
+    agentId, configVersion: version, editionDate, providerId: provider.id, model: modelName,
     status: "running", inputClusterIds: pack.clusterIds, inputSourceItemIds: pack.sources.map((s) => s.sourceItemId),
     promptHash, startedAt: new Date(),
   }).returning();
@@ -94,7 +94,7 @@ export async function runAgent(agentId: string, editionDate: string, opts: { job
   let lastErrors: string[] = [];
   for (let attempt = 1; attempt <= 2; attempt++) {
     try {
-      const res = await provider.generate({ model: agent.config.model.name, system, user, temperature: agent.config.model.temperature, topP: agent.config.model.top_p, maxTokens: agent.config.model.max_tokens, json: true, runId: attempt === 1 ? runKey : `${runKey}-repair` });
+      const res = await provider.generate({ model: modelName, system, user, temperature: agent.config.model.temperature, topP: agent.config.model.top_p, maxTokens: agent.config.model.max_tokens, json: true, runId: attempt === 1 ? runKey : `${runKey}-repair` });
       const cost = estimateCost(res.model, res.inputTokens, res.outputTokens);
       let parsed: AgentOutput;
       try { parsed = AgentOutput.parse(extractJson(res.text)); }

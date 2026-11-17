@@ -3,6 +3,7 @@ import { desc, gte, sql } from "drizzle-orm";
 import { db, schema } from "@/db/client";
 import { safeEqual } from "@/lib/auth/session";
 import { editionFreshness } from "@/lib/jobs/runner";
+import { resolveModel } from "@/lib/ai/registry";
 export const dynamic = "force-dynamic";
 
 /**
@@ -31,7 +32,7 @@ export async function GET(req: Request) {
   ]);
   const failing = await db.select({ id: schema.sourceProviders.id, status: schema.sourceProviders.lastStatus, error: schema.sourceProviders.lastError }).from(schema.sourceProviders).where(sql`${schema.sourceProviders.lastStatus} is distinct from 'ok'`).limit(40);
   return NextResponse.json({
-    now: new Date().toISOString(), freshness: fresh.state, today: fresh.today, hasModelKey: !!process.env.ANTHROPIC_API_KEY,
+    now: new Date().toISOString(), freshness: fresh.state, today: fresh.today, model: (() => { const m = resolveModel("anthropic", "claude-sonnet-5-5"); const a = m.provider.available(); return { provider: m.provider.id, model: m.model, ready: a.ok, reason: a.ok ? null : a.reason }; })(),
     editions, jobs: jobs.map((j) => ({ ...j, stats: j.stage === "collect" || j.stage === "process" ? j.stats : undefined })), sources, failingSources: failing, items: items[0], briefings, agentRuns, logs,
   });
 }
