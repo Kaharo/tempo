@@ -5,7 +5,7 @@
  *  3. on an empty database, load the first edition export from data/seed
  *  4. seed structural rows, sync sources and agents
  */
-import { readdirSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { migrate } from "drizzle-orm/postgres-js/migrator";
 import { db, sql, hasDatabase } from "@/db/client";
@@ -30,5 +30,21 @@ async function main() {
   const { syncAgents } = await import("@/lib/agents/sync");
   await seed(); await syncSourceRegistry(); await syncAgents();
   console.log("[bootstrap] seed and registries synced");
+
+  // Manual editor perspectives committed to the repo for today's edition (data/manual/perspectives/<date>.json).
+  const { localDate } = await import("@/lib/dates");
+  const today = localDate(process.env.TEMPO_TIMEZONE ?? "Asia/Almaty");
+  const file = path.join(process.cwd(), "data", "manual", "perspectives", `${today}.json`);
+  if (existsSync(file)) {
+    const { submitPerspective } = await import("@/lib/agents/submit");
+    const { assembleEdition, publishEdition } = await import("@/lib/edition/assemble");
+    let added = 0;
+    for (const p of JSON.parse(readFileSync(file, "utf8"))) {
+      const r = await submitPerspective(p, today);
+      if (!r.ok) console.log(`[bootstrap] perspective ${p.agent} rejected: ${r.errors.join("; ")}`);
+      else if (!r.duplicate) { added++; console.log(`[bootstrap] perspective ${p.agent} accepted${r.warnings.length ? ` (${r.warnings.join("; ")})` : ""}`); }
+    }
+    if (added) { const a = await assembleEdition(today, { force: true, mode: "manual" }); await publishEdition(today); console.log(`[bootstrap] edition ${today} v${a.edition.version}: ${a.edition.status}`); }
+  }
 }
 main().catch((e) => { console.error("[bootstrap] failed:", e); process.exitCode = 1; }).finally(() => sql.end({ timeout: 5 }));
