@@ -25,6 +25,16 @@ What replaces them: a fact with a number, name or date; what the sources do **no
 
 No closing moral. Stop when the facts and the one judgement are on the page.
 
+## Facts versus your forecast
+
+A consequence the sources do not state is **your forecast**, not a fact. Write it in first person («я ожидаю…», «по-моему…») or leave it out. Never write it as a plain statement.
+
+Rejected example (the sources said nothing about other factories or about traffic):
+- «Оборонные предприятия Балтии вынуждены переходить на усиленный режим охраны.»
+- «Закрытие границы остановит грузоперевозки.»
+
+Do not sharpen details either: if the source says people were detained and security responded, do not write that security detained them.
+
 ## Banned moves
 
 - Abstract summarising sentences: «X становится инструментом Y», «ставки растут», «это сигнал для…», «на первый план выходит…», «меняет правила игры», «новая реальность».
